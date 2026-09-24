@@ -1,0 +1,7 @@
+<?php
+namespace App\Http\Controllers\Api;
+use App\Http\Controllers\Controller; use App\Models\{AdminActivity,Customer,Order,OrderItem,Product}; use Illuminate\Support\Facades\DB;
+class AdminController extends Controller {
+ public function statistics(){ $orders=Order::query();$sales=(clone $orders)->where('status','completed')->sum('total');return ['orders'=>$orders->count(),'revenue'=>(float)$sales,'customers'=>Customer::count(),'pending'=>Order::where('status','pending')->count(),'confirmed'=>Order::where('status','confirmed')->count(),'completed'=>Order::where('status','completed')->count(),'cancelled'=>Order::where('status','cancelled')->count(),'recent_orders'=>Order::with(['customer','items'])->latest()->take(6)->get(),'popular_products'=>OrderItem::select('product_name',DB::raw('SUM(quantity) as quantity'))->groupBy('product_name')->orderByDesc('quantity')->take(5)->get(),'daily_sales'=>Order::whereDate('created_at',today())->where('status','completed')->sum('total'),'weekly_sales'=>Order::whereBetween('created_at',[now()->startOfWeek(),now()->endOfWeek()])->where('status','completed')->sum('total'),'monthly_sales'=>Order::whereMonth('created_at',now()->month)->whereYear('created_at',now()->year)->where('status','completed')->sum('total')]; }
+ public function customers(){return Customer::withCount('orders')->withSum('orders','total')->withMax('orders','created_at')->latest()->get();} public function activities(){return AdminActivity::latest()->take(50)->get();}
+}

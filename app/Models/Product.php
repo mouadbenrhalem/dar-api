@@ -1,0 +1,1 @@
+<?php namespace App\Models; use Illuminate\Database\Eloquent\Model; class Product extends Model { protected $fillable=['name','category','price','image_path','description','is_available','stock']; protected $casts=['price'=>'decimal:2','is_available'=>'boolean']; public function orderItems(){ return $this->hasMany(OrderItem::class); } }
